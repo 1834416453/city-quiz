@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你最吸引哪个城市？</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","PingFang SC",sans-serif;
+  color:#536b78;
+  background:linear-gradient(135deg,#eaf8fb,#fdfcff 55%,#e8f1ff);
+}
+button{font:inherit;cursor:pointer}
+.app{width:min(680px,100%);margin:auto;padding:22px 16px 40px}
+.page{
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(160,195,210,.35);
+  border-radius:28px;
+  padding:28px 22px;
+  box-shadow:0 12px 45px rgba(105,145,170,.12);
+}
+.tag{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:30px;
+  background:#e1f3f8;
+  color:#75a8b9;
+  font-size:12px;
+  letter-spacing:1px;
+}
+h1{font-size:clamp(28px,7vw,44px);line-height:1.3;margin:20px 0 12px;color:#526d7b}
+h2{font-size:25px;line-height:1.5;color:#526d7b}
+p{line-height:1.9}
+.sub{color:#91a4ad;font-size:14px}
+.ornament{text-align:center;font-size:42px;margin:10px 0}
+.primary{
+  border:0;
+  border-radius:999px;
+  background:#91c9d9;
+  color:white;
+  padding:14px 28px;
+  width:100%;
+  margin-top:18px;
+  box-shadow:0 6px 16px rgba(116,180,202,.25);
+}
+.primary:active{transform:scale(.98)}
+.progress-wrap{height:7px;background:#e6f0f4;border-radius:20px;overflow:hidden;margin:8px 0 24px}
+.progress{height:100%;background:#91c9d9;width:0%;transition:width .25s}
+.question-no{font-size:13px;color:#9bb2bd;letter-spacing:1px}
+.question{font-size:23px;line-height:1.6;margin:15px 0 22px;color:#526d7b}
+.options{display:grid;gap:12px}
+.option{
+  width:100%;
+  text-align:left;
+  padding:16px 17px;
+  border:1px solid #dcebf0;
+  border-radius:17px;
+  background:#fff;
+  color:#617985;
+  line-height:1.6;
+  transition:.2s;
+}
+.option:hover{border-color:#91c9d9;background:#f4fbfd}
+.option.selected{background:#dff3f8;border-color:#91c9d9;color:#477c8d}
+.result-city{font-size:42px;color:#6ba9bc;margin:14px 0}
+.result-symbol{font-size:76px;margin:8px}
+.result-box{background:#f1f9fb;border-radius:22px;padding:20px;margin:20px 0}
+.result-box h3{margin:0 0 8px;color:#6c9dad}
+.result-box p{margin:0;font-size:15px}
+.small{font-size:12px;color:#a0b2ba;text-align:center;margin-top:20px}
+.hidden{display:none!important}
+.restart{background:transparent;color:#83aeba;border:1px solid #b8dbe5;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="page" id="start">
+    <div class="tag">CITY PERSONALITY TEST</div>
+    <div class="ornament">☁︎ 𓂃 ࣪˖</div>
+    <h1>你最吸引哪个城市？</h1>
+    <p>30道小测试，看看你的气质、生活方式和隐藏性格，最像哪一座中国城市。</p>
+    <p class="sub">没有标准答案 · 凭第一感觉选择 · 约需5分钟</p>
+    <button class="primary" onclick="startQuiz()">开始测试 →</button>
+    <div class="small">made for your little city story</div>
+  </section>
+
+  <section class="page hidden" id="quiz">
+    <div class="question-no" id="questionNo"></div>
+    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <button class="primary hidden" id="nextBtn" onclick="nextQuestion()">下一题 →</button>
+  </section>
+
+  <section class="page hidden" id="result">
+    <div class="tag">YOUR CITY RESULT</div>
+    <div class="ornament" id="resultSymbol">✦</div>
+    <p class="sub">测试结果是……</p>
+    <div class="result-city" id="resultCity"></div>
+    <p id="resultIntro"></p>
+    <div class="result-box">
+      <h3>你的城市气质</h3>
+      <p id="resultDetail"></p>
+    </div>
+    <div class="result-box">
+      <h3>适合你的生活关键词</h3>
+      <p id="resultKeywords"></p>
+    </div>
+    <button class="primary" onclick="shareResult()">复制我的测试结果</button>
+    <button class="primary restart" onclick="restart()">再测一次</button>
+    <div class="small">结果仅供娱乐，也许你比一座城市更加复杂。</div>
+  </section>
+</div>
+
+<script>
+const cities=[
+["成都","☁︎","松弛、温柔、会享受生活","你有一种不急着证明自己的魅力。你喜欢舒服的关系、好吃的东西和属于自己的小世界。看起来随和，其实很清楚自己想要什么。","慢节奏 / 美食 / 小店 / 朋友 / 自在"],
+["上海","✦","精致、独立、带一点距离感","你对生活有自己的审美和标准。你不一定喜欢热闹，但喜欢有品质、有分寸的相处方式。你的魅力来自清醒与细节。","审美 / 独立 / 夜景 / 设计 / 精致"],
+["北京","⌂","坦率、聪明、有自己的主见","你不喜欢拐弯抹角，也不愿意被简单定义。你有很强的思考能力，喜欢有内容的聊天，也有一点不服输的劲儿。","表达 / 思考 / 胡同 / 文化 / 自由"],
+["广州","☀","务实、包容、生命力旺盛","你比自己想象中更有适应力。你能接受不同的人和生活方式，重视实际的幸福，也懂得把日子过得热气腾腾。","烟火气 / 包容 / 美食 / 生活 / 活力"],
+["深圳","↗","行动派、自由、未来感","你不喜欢停在原地太久。你愿意尝试新东西，重视效率和个人成长，身上有一种想把未来握在手里的感觉。","机会 / 科技 / 成长 / 效率 / 新鲜感"],
+["重庆","↯","浓烈、直觉系、情绪丰富","你的情感很有层次，喜欢鲜明的人和事。你可能嘴上说着无所谓，心里却记得很多细节。你的魅力是热烈又有一点神秘。","山城 / 夜色 / 热烈 / 故事 / 反差"],
+["杭州","☘","温柔、浪漫、重视精神世界","你喜欢漂亮而安静的东西，也在意生活中的情绪和氛围。你不是没有野心，只是希望成功的同时也能保留自己的柔软。","湖边 / 文艺 / 生活感 / 浪漫 / 松弛"],
+["南京","☾","安静、知性、带有旧时光气质","你身上有一种不喧哗的吸引力。你喜欢有历史感、故事感的东西，也容易被细节和长期积累打动。","梧桐 / 书店 / 旧城 / 安静 / 深度"],
+["西安","✧","厚重、神秘、内心坚定","你可能比外表更有自己的坚持。你喜欢有来历、有文化、有故事的东西，不会轻易被表面的热闹带走。","古城 / 历史 / 文化 / 坚定 / 故事"],
+["厦门","𓇼","清透、浪漫、喜欢小确幸","你需要一定的个人空间，也喜欢海风、阳光和漂亮的小事。你有自己的节奏，不愿意让生活一直处在紧绷状态。","海边 / 咖啡 / 阳光 / 慢生活 / 小确幸"],
+["苏州","❀","温婉、细腻、审美感强","你很会感受氛围，也容易注意到别人忽略的小细节。你不喜欢粗糙的关系，更希望一切都温柔、有分寸。","园林 / 细节 / 温柔 / 手作 / 安静"],
+["青岛","𓆉","清爽、自由、带一点少年感","你喜欢简单直接的快乐，不太愿意被复杂的人际关系困住。你有清醒的一面，也有很可爱、很轻盈的一面。","海风 / 啤酒屋 / 清爽 / 朋友 / 自由"],
+["大连","⚓","克制、可靠、外冷内热","你看起来可能比较冷静，但其实很重感情。你不太习惯把所有情绪说出来，更倾向于用行动表达在乎。","海港 / 可靠 / 克制 / 长情 / 安稳"],
+["昆明","☀︎","柔和、自然、治愈系","你向往没有太多压力的生活。你喜欢自然、阳光和舒服的人，真正吸引你的不是轰轰烈烈，而是每天都能感到安心。","鲜花 / 阳光 / 自然 / 治愈 / 慢慢来"],
+["长沙","♡","热情、可爱、社交能量强","你很容易给周围的人带来气氛。你喜欢好玩的东西，也愿意为喜欢的人和事投入情绪，是很有感染力的类型。","夜宵 / 热闹 / 可爱 / 朋友 / 快乐"],
+["武汉","✺","直率、坚韧、很有生命力","你有一种越是遇到事情，越能撑住的力量。你可能偶尔嘴硬，但内心很重情，也很愿意为自己的目标努力。","江城 / 烟火 / 坚韧 / 直率 / 热气"],
+["福州","❁","低调、温和、重视归属感","你不一定喜欢成为人群中心，但很在意熟悉的人和安心的生活。你有自己的小坚持，温柔里带着韧性。","温泉 / 老街 / 家 / 温和 / 安心"],
+["济南","♧","朴实、真诚、有人情味","你喜欢真实、不装腔的人。你重视相处时的舒服和信任，不需要太多华丽的表达，也能感受到关系里的温度。","泉水 / 老朋友 / 真诚 / 烟火 / 朴实"],
+["郑州","◇","务实、能扛事、目标感强","你很清楚生活不只是浪漫，也需要一步一步去实现。你有现实感，但并不代表你没有梦想，只是你更愿意付诸行动。","效率 / 目标 / 坚持 / 现实 / 进步"],
+["合肥","▧","理性、安静、潜力型","你可能不是最吵闹的那个人，却会在关键时刻展现实力。你喜欢慢慢积累，也相信真正的变化需要时间。","学习 / 积累 / 理性 / 稳定 / 潜力"],
+["南昌","✿","清新、随性、带一点倔强","你喜欢按照自己的方式生活，不太愿意被外界的标准牵着走。你看起来随意，心里其实有很明确的偏好。","江边 / 随性 / 清新 / 自我 / 小坚持"],
+["珠海","☼","松弛、浪漫、喜欢自由","你不喜欢把人生过得太拥挤。你向往阳光、海边和有余裕的生活，希望每天都能留下属于自己的时间。","海岛 / 阳光 / 自由 / 慢节奏 / 浪漫"],
+["哈尔滨","❄","有趣、反差、内心柔软","你可能拥有很特别的审美或幽默感，不喜欢千篇一律。你看起来有点酷，熟悉之后却会发现你很温柔。","冰雪 / 反差 / 童话 / 酷感 / 温柔"],
+["乌鲁木齐","✈","自由、辽阔、向往远方","你不喜欢被狭小的环境限制。你对未知有好奇心，喜欢不同文化和风景，也渴望拥有真正属于自己的方向。","远方 / 旅行 / 辽阔 / 自由 / 探索"],
+["贵阳","☔","安静、灵动、有自己的节奏","你不追求所有人都理解你。你更在意自己是否舒服、是否真诚，也容易被自然、雨天和有故事的地方吸引。","雨天 / 山城 / 安静 / 灵气 / 自在"]
+];
+
+const questions=[
+["如果突然获得一天假期，你会？",["宅在家里享受独处","去逛街、看展或咖啡店","约朋友出去玩","临时决定去一个陌生地方"]],
+["你更喜欢哪种天气？",["阴天和微风","晴天和阳光","下雨天","雪天或雾天"]],
+["你理想中的房间是？",["温暖舒适，有很多小东西","简洁精致，配色统一","热闹可爱，充满生活感","复古神秘，有故事感"]],
+["你在人群中通常是？",["安静观察的人","有自己审美和想法的人","负责活跃气氛的人","看心情决定要不要社交"]],
+["你更在意？",["生活舒不舒服","有没有自己的风格","和身边人开不开心","能不能做自己"]],
+["遇到问题时，你会？",["先冷静分析","找人讨论","直接行动解决","先放一放，等灵感出现"]],
+["你喜欢的旅行方式？",["慢慢逛街区和小店","看展、拍照、住漂亮酒店","吃遍当地美食","去自然风景或冷门地方"]],
+["你最容易被什么吸引？",["细节和氛围","独特的审美","有趣的人","神秘感和故事感"]],
+["你希望别人怎么形容你？",["温柔可靠","有品位","有趣可爱","特别难以定义"]],
+["你对未来的态度？",["顺其自然，过好现在","希望变得更优秀","想拥有很多可能性","想去很远的地方看看"]],
+["你更喜欢哪种店？",["有阳光和植物的咖啡店","设计感很强的买手店","热闹的小吃店","藏在巷子里的旧书店"]],
+["朋友失恋了，你会？",["陪着他，不急着说话","帮他分析问题","带他出去玩","听他讲完整个故事"]],
+["你喜欢的颜色更接近？",["奶油白、浅蓝、米色","黑白、银色、灰色","粉色、橙色、亮黄色","墨绿、酒红、深蓝"]],
+["你更想住在哪里？",["生活方便又舒服的地方","充满机会的大城市","有烟火气的街区","靠近山海、安静的地方"]],
+["你购物时最容易买？",["家居小物","衣服和饰品","零食和可爱东西","有特殊意义的纪念品"]],
+["你理想的周末？",["睡到自然醒，慢慢吃饭","去展览或逛街","和朋友聚会","一个人去远一点的地方"]],
+["你更喜欢哪种关系？",["自然舒服，不用解释","互相欣赏，有精神交流","热烈直接，什么都能聊","安静但深刻，彼此懂得"]],
+["你做决定时更依赖？",["当下的感受","理性和标准","朋友的建议","直觉"]],
+["你最不能接受？",["生活一直被催促","没有审美和分寸","气氛尴尬无聊","被别人规定应该怎样"]],
+["你喜欢的电影氛围？",["日常治愈系","都市时尚系","欢乐热闹系","悬疑复古系"]],
+["你更像哪种植物？",["柔软的小雏菊","精致的玫瑰","向阳的向日葵","安静的银杏"]],
+["如果开一家店，你会开？",["咖啡店或甜品店","设计工作室","热闹的小餐馆","旧书店或古着店"]],
+["你希望城市给你的感觉是？",["像家一样安心","让我不断成长","每天都有新鲜事","让我保留神秘和自由"]],
+["你更喜欢怎样的夜晚？",["在家看电影","逛商场或看夜景","和朋友吃夜宵","独自散步看灯光"]],
+["你对陌生人的态度？",["礼貌但保持距离","观察对方有没有趣","很快就能聊起来","先观察很久"]],
+["你更喜欢哪种声音？",["雨声和风声","城市街道的声音","朋友们的笑声","火车、海浪或远方的声音"]],
+["你认为幸福更像？",["舒服地过每一天","实现自己的目标","和喜欢的人在一起","拥有选择人生的自由"]],
+["你更想拥有哪种超能力？",["让所有人都放松","快速学会任何技能","让大家开心","瞬间去任何地方"]],
+["你最想收藏？",["生活中的小物件","漂亮的设计品","和朋友的回忆","旅途中带回来的故事"]],
+["最后凭直觉选一个词？",["松弛","闪耀","热烈","远方"]]
+];
+
+let current=0, answers=[], scores=Array(25).fill(0);
+const weights=[
+[0,6,13,21],[1,2,4,8],[0,10,11,22],[2,1,5,8],[0,1,3,6],
+[8,18,4,23],[6,1,0,23],[10,1,8,24],[0,1,14,8],[0,4,23,24],
+[13,1,3,8],[12,1,14,8],[6,1,14,8],[0,4,13,23],[10,1,14,8],
+[0,1,14,23],[0,7,14,8],[8,18,4,23],[0,1,14,8],[6,1,14,8],
+[10,1,14,8],[6,1,3,8],[0,4,14,23],[0,1,14,23],[0,1,14,24],
+[0,4,14,23],[0,1,14,23],[0,4,14,23],[0,1,14,23]
+];
+
+function startQuiz(){
+ document.getElementById("start").classList.add("hidden");
+ document.getElementById("quiz").classList.remove("hidden");
+ showQuestion();
+}
+function showQuestion(){
+ const q=questions[current];
+ document.getElementById("questionNo").textContent=`QUESTION ${String(current+1).padStart(2,"0")} / 30`;
+ document.getElementById("progress").style.width=((current)/30*100)+"%";
+ document.getElementById("question").textContent=q[0];
+ const box=document.getElementById("options");
+ box.innerHTML="";
+ q[1].forEach((text,i)=>{
+  const btn=document.createElement("button");
+  btn.className="option";
+  btn.textContent=text;
+  btn.onclick=()=>choose(i,btn);
+  box.appendChild(btn);
+ });
+ document.getElementById("nextBtn").classList.add("hidden");
+}
+function choose(i,btn){
+ answers[current]=i;
+ document.querySelectorAll(".option").forEach(b=>b.classList.remove("selected"));
+ btn.classList.add("selected");
+ document.getElementById("nextBtn").classList.remove("hidden");
+ document.getElementById("nextBtn").textContent=current===29?"查看结果 ✦":"下一题 →";
+}
+function nextQuestion(){
+ if(answers[current]===undefined)return;
+ if(current===29){showResult();return}
+ current++;
+ showQuestion();
+}
+function showResult(){
+ scores=Array(25).fill(0);
+ answers.forEach((a,i)=>scores[weights[i][a]]++);
+ let max=Math.max(...scores), index=scores.indexOf(max);
+ const city=cities[index];
+ document.getElementById("quiz").classList.add("hidden");
+ document.getElementById("result").classList.remove("hidden");
+ document.getElementById("resultSymbol").textContent=city[1];
+ document.getElementById("resultCity").textContent=city[0];
+ document.getElementById("resultIntro").textContent=city[2];
+ document.getElementById("resultDetail").textContent=city[3];
+ document.getElementById("resultKeywords").textContent=city[4];
+}
+function shareResult(){
+ const city=document.getElementById("resultCity").textContent;
+ const text=`我的测试结果是：${city}！你最吸引哪个城市？`;
+ if(navigator.clipboard&&navigator.clipboard.writeText){
+  navigator.clipboard.writeText(text).then(()=>alert("结果已复制，可以发给朋友啦！")).catch(()=>alert(text));
+ }else{alert(text)}
+}
+function restart(){
+ current=0;answers=[];scores=Array(25).fill(0);
+ document.getElementById("result").classList.add("hidden");
+ document.getElementById("quiz").classList.remove("hidden");
+ showQuestion();
+}
+</script>
+</body>
+</html>
